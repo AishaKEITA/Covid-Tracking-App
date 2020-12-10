@@ -2,9 +2,6 @@
   <div id="app">
   <v-app id="inspire">
     <div>
-      <v-alert type="sucess">
-        testing
-      </v-alert>
 
     </div>
   </v-app>
