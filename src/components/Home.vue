@@ -1,11 +1,7 @@
 <template>
-  <div id="app">
+  <div id="home">
   <v-app id="inspire">
     <div>
-      <v-alert type="sucess">
-        I'm a success alert.
-      </v-alert>
-
     </div>
   </v-app>
 </div>
@@ -16,26 +12,21 @@ export default {
   name: 'Home',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+
     }
+  },
+  // simple fetch of the api
+  created () {
+    fetch('https://api.covidtracking.com/v1/us/current.json')
+      .then(response => response.json())
+      .then(data => {
+        console.log(data)
+      })
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1, h2 {
-  font-weight: normal;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
+
 </style>
