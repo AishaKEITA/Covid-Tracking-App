@@ -1,8 +1,13 @@
 <template>
   <div id="home">
   <v-app id="inspire">
-    <div>
-    </div>
+      <div>
+  <ul>
+      <li v-for="(value, key) in post" :key="key">
+         {{ key }} : {{ value }}
+     </li>
+    </ul>
+  </div>
   </v-app>
 </div>
 </template>
@@ -12,7 +17,7 @@ export default {
   name: 'Home',
   data () {
     return {
-
+      post: null
     }
   },
   // simple fetch of the api
@@ -20,9 +25,13 @@ export default {
     fetch('https://api.covidtracking.com/v1/us/current.json')
       .then(response => response.json())
       .then(data => {
-        console.log(data)
+        this.post = data
+        console.log(this.post)
       })
   }
+//   methods () {
+
+//   }
 }
 </script>
 
