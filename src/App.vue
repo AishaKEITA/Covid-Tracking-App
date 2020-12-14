@@ -50,5 +50,6 @@ html {
 }
 .logo {
   width: 40%;
+  height: auto;
 }
 </style>
