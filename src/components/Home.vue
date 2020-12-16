@@ -1,13 +1,14 @@
 <template>
   <div id="home">
   <v-app id="inspire">
+    <tr> <h1>The current US values</h1></tr>
     <v-simple-table>
       <template v-slot:default>
         <thead>
           <tr>
-        <th class="text-left">Date</th>
-          <th class="text-left">Date Checked</th>
-            <th class="text-left"> Death</th>
+            <th class="text-left">Date</th>
+            <th class="text-left">Date Checked</th>
+            <th class="text-left">Death</th>
             <th class="text-left">Death Increase</th>
             <th class="text-left">Hash</th>
             <th class="text-left">Hospitalized</th>
@@ -36,7 +37,7 @@
           <tr
            v-for=" posts in post" :key="posts.date"
           >
-            <td>{{posts.date}} </td>
+            <td >{{posts.date}} </td>
             <td>{{posts.dateChecked}} </td>
             <td>{{posts.death}} </td>
             <td>{{posts.deathIncrease}} </td>
@@ -91,5 +92,10 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
+#inspire {
+    margin: 2%;
+}
+h1 {
+    color: gray;
+}
 </style>
