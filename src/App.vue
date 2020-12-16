@@ -12,11 +12,11 @@
 
       <v-spacer></v-spacer>
       <v-btn @click="$router.push('/').catch(() => {})" text>
-        <span>Home</span>
+        <span>Data Table</span>
         <!-- <v-icon>mdi-open-in-new</v-icon> -->
       </v-btn>
       <v-btn class="ml-2" @click="$router.push('/About').catch(() => {})" text>
-        <span>About Us</span>
+        <span>Overview</span>
         <!-- <v-icon>mdi-open-in-new</v-icon> -->
       </v-btn>
     </v-app-bar>
