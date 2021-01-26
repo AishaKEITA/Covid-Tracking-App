@@ -1,101 +1,140 @@
 <template>
-  <div id="home">
-  <v-app id="inspire">
-    <tr> <h1>The current US values</h1></tr>
-    <v-simple-table>
-      <template v-slot:default>
-        <thead>
-          <tr>
-            <th class="text-left">Date</th>
-            <th class="text-left">Date Checked</th>
-            <th class="text-left">Death</th>
-            <th class="text-left">Death Increase</th>
-            <th class="text-left">Hash</th>
-            <th class="text-left">Hospitalized</th>
-            <th class="text-left">Hospitalized Cumulative</th>
-            <th class="text-left">Hospitalized Currently:</th>
-            <th class="text-left">hospitalized Increase</th>
-            <th class="text-left">Inicummulative</th>
-            <th class="text-left">Inicucurrently</th>
-            <th class="text-left">Last Modified</th>
-            <th class="text-left">Negative</th>
-            <th class="text-left">Negative Increase</th>
-            <th class="text-left">Onventilator Cumulative </th>
-            <th class="text-left">OnVentilator Currently</th>
-            <th class="text-left">Pending</th>
-            <th class="text-left">PosNeg</th>
-            <th class="text-left">Positive</th>
-            <th class="text-left">Positive Increase</th>
-            <th class="text-left">Recovered</th>
-            <th class="text-left">States</th>
-            <th class="text-left">Total</th>
-            <th class="text-left">Total Test Results</th>
-            <th class="text-left">Total Test Results Increase</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-           v-for=" posts in post" :key="posts.date"
-          >
-            <td >{{posts.date}} </td>
-            <td>{{posts.dateChecked}} </td>
-            <td>{{posts.death}} </td>
-            <td>{{posts.deathIncrease}} </td>
-            <td>{{posts.hash}} </td>
-            <td>{{posts.hospitalized}} </td>
-            <td>{{posts.hospitalizedCumulative}} </td>
-             <td>{{posts.hospitalizedCurrently}} </td>
-            <td>{{posts.hospitalizedIncrease}} </td>
-            <td>{{posts.inIcuCumulative}} </td>
-            <td>{{posts.inIcuCurrently}} </td>
-            <td>{{posts.lastModified}} </td>
-            <td>{{posts.negative}} </td>
-            <td>{{posts.negativeIncrease}} </td>
-            <td>{{posts.onVentilatorCumulative}} </td>
-            <td>{{posts.onVentilatorCurrently}} </td>
-            <td>{{posts.pending}} </td>
-            <td>{{posts.posNeg}} </td>
-            <td>{{posts.positive}} </td>
-            <td>{{posts.positiveIncrease}} </td>
-            <td>{{posts.recovered}} </td>
-            <td>{{posts.states}} </td>
-            <td>{{posts.total}} </td>
-            <td>{{posts.totalTestResults}} </td>
-            <td>{{posts.totalTestResultsIncrease}} </td>
-            </tr>
-        </tbody>
-      </template>
-    </v-simple-table>
+ <v-app id="home">
+   <v-main>
+<h1>The current US values - Total deaths</h1>
+<v-container fluid>
+        <v-row align="center">
+        <v-col
+          class="d-flex align-center"
+          cols="12"
+          sm="6"
+        >
+        <v-select backgroundColor="#DDD" color="blue" @change="changeState" v-model="stateSelectedByUser"
+          :hint="`Deaths: ${deathsBySingleState} - Date: ${dateBySingleState} `"
+            :items="states"
+            label="Choose a state"
+          ></v-select>
+          <span>Selected: {{ stateSelectedByUser }}</span>
+        </v-col>
+      </v-row>
+        </v-container>
+      <div class
+      ="container">
+     <div class ="chart">
+       <Bar
+        v-if="loaded"
+        :chartdata="chartdata"/>
+      </div>
+    </div>
+      <div v-for="(info, index) in covidData" :key="index">
+        <div v-for="(value, key) in info" :key="key">
+         <!-- key: {{key}}: value: {{value}} -->
+        </div>
+      </div>
+      </v-main>
   </v-app>
-</div>
 </template>
 
 <script>
+import Bar from './Chart'
 export default {
+
+  components: {Bar},
+  // eslint-disable-next-line no-dupe-keys
   name: 'Home',
   data () {
+    // death for a specific state for the last 30 days
+    // update the chart when getting the last 30 days
     return {
-      post: null
+      loaded: false,
+      chartdata: null,
+      covidData: [],
+      states: [],
+      deaths: [],
+      dates: [],
+      deathsBySingleState: '',
+      dateBySingleState: '',
+      stateSelectedByUser: '',
+      deathsByStates: '',
+      chartOptions: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
     }
   },
+
   // simple fetch of the api
   created () {
-    fetch('https://api.covidtracking.com/v1/us/current.json')
+    this.loaded = false
+    fetch('https://api.covidtracking.com/v1/states/current.json')
       .then(response => response.json())
       .then(data => {
-        this.post = data
-        console.log(this.post)
+        this.covidData = data
+        // console.log(this.covidData)
+        for (let covidInfo of this.covidData) {
+          // console.log(covidInfo.death)
+          // this.death = covidInfo.death
+          this.deaths.push(covidInfo.death)
+          this.dates.push(covidInfo.date)
+          this.states.push(covidInfo.state)
+          // console.log(covidInfo.date)
+          // console.log(covidInfo.state)
+        }
+
+        // this.chartdata = death
+        this.chartdata = {
+          labels: this.states,
+          datasets: [{
+            label: 'Death',
+            backgroundColor: '#f87979',
+            data: this.deaths,
+            borderWidth: 1,
+            barPercentage: 0.5,
+            barThickness: 6,
+            minBarLength: 1,
+            maxBarThickness: 8
+          }
+          ]
+
+        }
+        this.loaded = true
       })
+  },
+  methods: {
+    /* fetch daily deaths in all states */
+    async getDeathsByStates (state) {
+      try {
+        const response = await fetch(`https://api.covidtracking.com/v1/states/${state}/daily.json`)
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(`Got error code: ${response.status} Error: ${data.error}`)
+        }
+        this.deathsByStates = data
+        // console.log(this.deathsByStates[0].date)
+        console.log(this.deathsByStates[0].death)
+        this.deathsBySingleState = this.deathsByStates[0].death
+        this.dateBySingleState = this.deathsByStates[0].date
+      } catch (err) {
+        console.log(err)
+      }
+    },
+    /* calling the getDeathByStates function through changeState event */
+    changeState (event) {
+      const state = event.toLowerCase()
+      console.log(state)
+      this.getDeathsByStates(state)
+    }
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-#inspire {
-    margin: 2%;
-}
 h1 {
-    color: gray;
+  color: gray;
+  text-align: center;
+
 }
+
 </style>
