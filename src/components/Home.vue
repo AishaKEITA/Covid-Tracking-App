@@ -11,8 +11,8 @@
         >
         <v-select backgroundColor="#DDD" color="blue" @change="changeState" v-model="stateSelectedByUser"
           :hint="`Deaths: ${deathsBySingleState} - Date: ${dateBySingleState} `"
-            :items="states"
-            label="Choose a state"
+            :items="allStatesNames"
+            label="Choose a state and see death for the last 30 days"
           ></v-select>
           <span>Selected: {{ stateSelectedByUser }}</span>
         </v-col>
@@ -23,7 +23,7 @@
      <div class ="chart">
        <Bar
         v-if="loaded"
-        :chartdata="chartdata"/>
+        :chartData="chartdata"/>
       </div>
     </div>
       <div v-for="(info, index) in covidData" :key="index">
@@ -43,19 +43,18 @@ export default {
   // eslint-disable-next-line no-dupe-keys
   name: 'Home',
   data () {
-    // death for a specific state for the last 30 days
-    // update the chart when getting the last 30 days
+    // update the chart when getting the last 30 day
     return {
       loaded: false,
       chartdata: null,
       covidData: [],
-      states: [],
-      deaths: [],
-      dates: [],
+      allStatesNames: [],
+      allStatesDeaths: [],
+      last30daysDeaths: [],
+      last30daysDates: [],
       deathsBySingleState: '',
       dateBySingleState: '',
       stateSelectedByUser: '',
-      deathsByStates: '',
       chartOptions: {
         responsive: true,
         maintainAspectRatio: false
@@ -63,46 +62,39 @@ export default {
     }
   },
 
-  // simple fetch of the api
+  /* --- simple fetch of the api --- */
   created () {
     this.loaded = false
     fetch('https://api.covidtracking.com/v1/states/current.json')
       .then(response => response.json())
       .then(data => {
         this.covidData = data
-        // console.log(this.covidData)
         for (let covidInfo of this.covidData) {
-          // console.log(covidInfo.death)
-          // this.death = covidInfo.death
-          this.deaths.push(covidInfo.death)
-          this.dates.push(covidInfo.date)
-          this.states.push(covidInfo.state)
-          // console.log(covidInfo.date)
-          // console.log(covidInfo.state)
+          this.allStatesDeaths.push(covidInfo.death)
+          this.allStatesNames.push(covidInfo.state)
         }
 
-        // this.chartdata = death
         this.chartdata = {
-          labels: this.states,
+          labels: this.allStatesNames,
           datasets: [{
             label: 'Death',
             backgroundColor: '#f87979',
-            data: this.deaths,
+            data: this.allStatesDeaths,
             borderWidth: 1,
             barPercentage: 0.5,
             barThickness: 6,
             minBarLength: 1,
-            maxBarThickness: 8
+            maxBarThickness: 8,
+            type: 'bar'
           }
           ]
-
         }
         this.loaded = true
       })
   },
   methods: {
-    /* fetch daily deaths in all states */
-    async getDeathsByStates (state) {
+    /* --- fetch daily deaths in a states --- */
+    async getDeathByState (state) {
       try {
         const response = await fetch(`https://api.covidtracking.com/v1/states/${state}/daily.json`)
         const data = await response.json()
@@ -110,20 +102,49 @@ export default {
         if (!response.ok) {
           throw new Error(`Got error code: ${response.status} Error: ${data.error}`)
         }
-        this.deathsByStates = data
-        // console.log(this.deathsByStates[0].date)
-        console.log(this.deathsByStates[0].death)
-        this.deathsBySingleState = this.deathsByStates[0].death
-        this.dateBySingleState = this.deathsByStates[0].date
+
+        /* --- loop to get specific deaths for 30 days --- */
+        let deaths = []
+        let dates = []
+        let last30days = data.slice(0, 30)
+        for (let dailyData of last30days) {
+          deaths.push(dailyData.death)
+          dates.push(dailyData.date)
+        }
+
+        deaths.reverse()
+        dates.reverse()
+
+        this.last30daysDeaths = deaths
+        this.last30daysDates = dates
+
+        this.deathsBySingleState = data[0].death
+        this.dateBySingleState = data[0].date
+
+        this.chartdata = {
+          labels: this.last30daysDates,
+          datasets: [{
+            label: 'Deaths last 30 days',
+            backgroundColor: 'blue',
+            data: this.last30daysDeaths,
+            borderWidth: 1,
+            barPercentage: 0.5,
+            barThickness: 6,
+            minBarLength: 1,
+            maxBarThickness: 8,
+            type: 'line',
+            fill: false
+          }
+          ]
+        }
       } catch (err) {
         console.log(err)
       }
     },
-    /* calling the getDeathByStates function through changeState event */
+    /* --- calling the getDeathByState function through changeState event --- */
     changeState (event) {
       const state = event.toLowerCase()
-      console.log(state)
-      this.getDeathsByStates(state)
+      this.getDeathByState(state)
     }
   }
 }
@@ -134,7 +155,13 @@ export default {
 h1 {
   color: gray;
   text-align: center;
-
+  font-size: 40px;
+  font-family:monospace;
+}
+span {
+  margin-left: 10px;
+  font-size: 25px;
+  color: blue;
 }
 
 </style>
