@@ -12,7 +12,7 @@
 
       <v-spacer></v-spacer>
       <v-btn @click="$router.push('/').catch(() => {})" text>
-        <span>Data Table</span>
+        <span>Home</span>
         <!-- <v-icon>mdi-open-in-new</v-icon> -->
       </v-btn>
       <v-btn class="ml-2" @click="$router.push('/About').catch(() => {})" text>
@@ -20,7 +20,6 @@
         <!-- <v-icon>mdi-open-in-new</v-icon> -->
       </v-btn>
     </v-app-bar>
-
     <v-main>
       <router-view />
     </v-main>
@@ -42,9 +41,7 @@ export default {
 }
 </script>
 <style>
-html {
-  overflow-y: hidden !important;
-}
+
 * {
   box-sizing: border-box !important;
 }
@@ -52,4 +49,5 @@ html {
   width: 40%;
   height: auto;
 }
+
 </style>
