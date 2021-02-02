@@ -93,7 +93,7 @@ export default {
       })
   },
   methods: {
-    /* --- fetch daily deaths in a states --- */
+    /* --- fetch daily deaths in a state --- */
     async getDeathByState (state) {
       try {
         const response = await fetch(`https://api.covidtracking.com/v1/states/${state}/daily.json`)
