@@ -104,8 +104,8 @@ export default {
         }
 
         /* --- loop to get specific deaths for 30 days --- */
-        let deaths = []
-        let dates = []
+        const deaths = []
+        const dates = []
         let last30days = data.slice(0, 30)
         for (let dailyData of last30days) {
           deaths.push(dailyData.death)
